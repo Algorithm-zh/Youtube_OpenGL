@@ -9,7 +9,7 @@ int main (int argc, char *argv[]) {
     return -1;
   }
 
-  window = glfwCreateWindow(1920, 1080, "Hello world", nullptr, nullptr);
+  window = glfwCreateWindow(640, 480, "Hello world", nullptr, nullptr);
   if(!window){
     glfwTerminate();
     return -1;
@@ -24,14 +24,21 @@ int main (int argc, char *argv[]) {
 
   float positions[6] = {
     -0.5, -0.5,
-    0.5, 0.5,
+    0, 0.5,
     0.5, -0.5
   };
 
+  //将顶点数据存储到gpu
   unsigned int VBO;
   glGenBuffers(1, &VBO);
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+
+  //启用顶点属性0并告诉opengl如何解析顶点数据
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)0);
+
+
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
