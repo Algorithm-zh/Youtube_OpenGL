@@ -5,6 +5,24 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <signal.h>
+
+#define ASSERT(x) if (!(x)) raise(SIGTRAP);
+#define GLCall(x) GLClearError();\
+  x;\
+  ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+static void GLClearError(){
+  while(glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char* function, const char* file, int line){
+  while(GLenum error = glGetError()){
+    std::cout << "[OpenGL Error] (" << error << "):" << function << " " << file << ":" << line << std::endl;
+    return false;
+  }
+  return true;
+}
 
 struct ShaderProgramSource{
   std::string VertexSource;
@@ -62,7 +80,7 @@ static unsigned int CompileShader(unsigned int type, const std::string& source){
 
 static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader){
 
-  unsigned int program = glCreateProgram();
+  GLCall(unsigned int program = glCreateProgram());
   unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
   unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
@@ -112,13 +130,13 @@ int main (int argc, char *argv[]) {
 
   //将顶点数据存储到gpu
   unsigned int VBO;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+  GLCall(glGenBuffers(1, &VBO));
+  GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+  GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
 
   //启用顶点属性0并告诉opengl如何解析顶点数据
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)0);
+  GLCall(glEnableVertexAttribArray(0));
+  GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)0));
 
 
   //创建索引缓冲区，记录顶点绘制顺序
@@ -141,7 +159,7 @@ int main (int argc, char *argv[]) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
 
     glfwSwapBuffers(window);
 
