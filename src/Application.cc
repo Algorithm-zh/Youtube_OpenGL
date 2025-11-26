@@ -7,10 +7,14 @@
 #include <sstream>
 #include <signal.h>
 
+#define Debug
+
 #define ASSERT(x) if (!(x)) raise(SIGTRAP);
-#define GLCall(x) GLClearError();\
-  x;\
-  ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+#ifdef Debug
+#define GLCall(x) GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__));
+#else
+#define GLCall(x) x
+#endif
 
 static void GLClearError(){
   while(glGetError() != GL_NO_ERROR);
@@ -110,6 +114,7 @@ int main (int argc, char *argv[]) {
   }
 
   glfwMakeContextCurrent(window);
+
   //必须在创建opengl渲染上下文之后再初始化glew才可以
   if(glewInit() != GLEW_OK){
     std::cout << "Error init glew" << std::endl;
@@ -141,25 +146,40 @@ int main (int argc, char *argv[]) {
 
   //创建索引缓冲区，记录顶点绘制顺序
   unsigned int ibo;
-  glGenBuffers(1, &ibo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+  GLCall(glGenBuffers(1, &ibo));
+  GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+  GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW));
 
   ShaderProgramSource source = ParseShader("res/shaders/Basic.shader");
 
   unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-  glUseProgram(shader);
+  GLCall(glUseProgram(shader));
+
+  // 使用uniform设置颜色
+  GLCall(int location = glGetUniformLocation(shader, "u_Color"));
+  GLCall(glUniform4f(location, 0.8f, 0.2f, 0.7f, 1.0f));
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+  float r = 0.0f;
+  float increment = 0.05f;
 
   while(!glfwWindowShouldClose(window)){
 
     //glclear在OpenGL库里
-    glClear(GL_COLOR_BUFFER_BIT);
+    GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
+    GLCall(glUniform4f(location, r, 0.2f, 0.7f, 1.0f));
+
+    if(r > 1.0f)
+      increment = -0.05f;
+    else if(r < 0.0f)
+      increment = 0.05f;
+
+    r += increment;
+
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
+    GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
     glfwSwapBuffers(window);
 
