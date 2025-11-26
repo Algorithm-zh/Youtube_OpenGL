@@ -107,6 +107,11 @@ int main (int argc, char *argv[]) {
     return -1;
   }
 
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+
   window = glfwCreateWindow(640, 480, "Hello world", nullptr, nullptr);
   if(!window){
     glfwTerminate();
@@ -133,11 +138,17 @@ int main (int argc, char *argv[]) {
     2, 3, 0
   };
 
+
+  //使用核心模式之后，必须创建VAO进行绑定，否则会报错
+  unsigned int VAO;
+  GLCall(glGenVertexArrays(1, &VAO));
+  GLCall(glBindVertexArray(VAO));
+
   //将顶点数据存储到gpu
   unsigned int VBO;
   GLCall(glGenBuffers(1, &VBO));
   GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-  GLCall(glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
+  GLCall(glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW));
 
   //启用顶点属性0并告诉opengl如何解析顶点数据
   GLCall(glEnableVertexAttribArray(0));
@@ -159,7 +170,10 @@ int main (int argc, char *argv[]) {
   GLCall(int location = glGetUniformLocation(shader, "u_Color"));
   GLCall(glUniform4f(location, 0.8f, 0.2f, 0.7f, 1.0f));
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  GLCall(glBindVertexArray(0));
+  GLCall(glUseProgram(0));
+  GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+  GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
   float r = 0.0f;
   float increment = 0.05f;
@@ -169,7 +183,13 @@ int main (int argc, char *argv[]) {
     //glclear在OpenGL库里
     GLCall(glClear(GL_COLOR_BUFFER_BIT));
 
+    GLCall(glUseProgram(shader));
     GLCall(glUniform4f(location, r, 0.2f, 0.7f, 1.0f));
+
+    GLCall(glBindVertexArray(VAO));
+
+    GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
+    GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
     if(r > 1.0f)
       increment = -0.05f;
@@ -177,9 +197,6 @@ int main (int argc, char *argv[]) {
       increment = 0.05f;
 
     r += increment;
-
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, VBO));
-    GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
     glfwSwapBuffers(window);
 
