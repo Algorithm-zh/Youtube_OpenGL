@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <iostream>
 #include "Renderer.h"
 
 struct VertexBufferElement{
@@ -31,15 +32,18 @@ public:
   template<typename T>
   void Push(unsigned int count){
     if constexpr (std::is_same_v<T, float>){
-      m_Elements.push_back({GL_FLOAT, count, false});
+      m_Elements.push_back({GL_FLOAT, count, GL_FALSE});
+      m_Stride += VertexBufferElement::GetSizeOfType(GL_FLOAT) * count;
     }
     else if constexpr (std::is_same_v<T, unsigned int>){
-      m_Elements.push_back({GL_UNSIGNED_INT, count, false});
+      m_Elements.push_back({GL_UNSIGNED_INT, count, GL_FALSE});
+      m_Stride += VertexBufferElement::GetSizeOfType(GL_UNSIGNED_INT) * count;
     }
     else if constexpr (std::is_same_v<T, unsigned char>){
-      m_Elements.push_back({GL_UNSIGNED_BYTE, count, true});
+      m_Elements.push_back({GL_UNSIGNED_BYTE, count, GL_TRUE});
+      m_Stride += VertexBufferElement::GetSizeOfType(GL_UNSIGNED_BYTE) * count;
     }
-    else{
+    else {
       static_assert(sizeof(T) == 0, "Unsupport type in Push<T>");
     }
   }
