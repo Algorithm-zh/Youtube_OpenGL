@@ -1,7 +1,6 @@
 #pragma once
-#include "Renderer.h"
 #include <vector>
-#include <GL/glew.h>
+#include "Renderer.h"
 
 struct VertexBufferElement{
   unsigned int type;
@@ -18,7 +17,6 @@ struct VertexBufferElement{
     return 0;
   }
 };
-
 class VertexBufferLayout{
 
 private:
