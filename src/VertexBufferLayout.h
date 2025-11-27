@@ -29,6 +29,7 @@ public:
   VertexBufferLayout()
     :m_Stride(0){}
 
+  //c++ 17语法 if constexpr
   template<typename T>
   void Push(unsigned int count){
     if constexpr (std::is_same_v<T, float>){
