@@ -4,6 +4,8 @@
 #include <GL/glew.h>
 #include <signal.h>
 
+#define Debug
+
 #define ASSERT(x) if (!(x)) raise(SIGTRAP);
 #ifdef Debug
 #define GLCall(x) GLClearError(); x; ASSERT(GLLogCall(#x, __FILE__, __LINE__));

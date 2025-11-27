@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(opengl)
 
-file(GLOB SRC ${PROJECT_SOURCE_DIR}/src/*.cc)
+file(GLOB SRC ${PROJECT_SOURCE_DIR}/src/*.cc
+              ${PROJECT_SOURCE_DIR}/src/vendor/*/*.cc)
 add_executable(opengl ${SRC})
 
 if(NOT CMAKE_BUILD_TYPE)
