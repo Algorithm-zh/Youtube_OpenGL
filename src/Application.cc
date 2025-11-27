@@ -10,9 +10,10 @@
 #include "VertexArray.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "glm/ext/matrix_clip_space.hpp"
 
-#define Debug
-
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 int main (int argc, char *argv[]) {
 
@@ -67,9 +68,12 @@ int main (int argc, char *argv[]) {
     //创建索引缓冲区，记录顶点绘制顺序
     IndexBuffer ib(indices, 6);
 
+    glm::mat4 proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+
     //创建着色器程序
     Shader shader("res/shaders/Basic.shader");
     shader.Bind();
+    shader.SetUniformMat4f("u_MVP", proj);
 
     //创建纹理
     Texture texture("res/textures/a.png");
