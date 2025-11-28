@@ -74,7 +74,7 @@ int main (int argc, char *argv[]) {
     IndexBuffer ib(indices, 6);
 
     glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -2.0f, 2.0f, -1.0f, 1.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f,0.0f,0.0f));
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f,0.0f,0.0f));
 
     //创建着色器程序
     Shader shader("res/shaders/Basic.shader");
@@ -106,7 +106,8 @@ int main (int argc, char *argv[]) {
 #endif
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    glm::vec3 translation(0.1f, 0.1f, 0.0f);
+    glm::vec3 translationA(0.1f, 0.1f, 0.0f);
+    glm::vec3 translationB(0.4f, 0.4f, 0.0f);
 
     while(!glfwWindowShouldClose(window)){
 
@@ -114,14 +115,20 @@ int main (int argc, char *argv[]) {
 
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplGlfw_NewFrame();
-
-      glm::mat4 model = glm::translate(glm::mat4(1.0f),translation);
-      glm::mat4 mvp = proj * view * model;
-
-      shader.Bind();
-      shader.SetUniformMat4f("u_MVP", mvp);
-
-      renderer.Draw(va, ib, shader);
+      {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f),translationA);
+        glm::mat4 mvp = proj * view * model;
+        shader.Bind();
+        shader.SetUniformMat4f("u_MVP", mvp);
+        renderer.Draw(va, ib, shader);
+      }
+      {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f),translationB);
+        glm::mat4 mvp = proj * view * model;
+        shader.Bind();
+        shader.SetUniformMat4f("u_MVP", mvp);
+        renderer.Draw(va, ib, shader);
+      }
 
       // Start the Dear ImGui frame
       ImGui_ImplOpenGL3_NewFrame();
@@ -129,7 +136,8 @@ int main (int argc, char *argv[]) {
       ImGui::NewFrame();
 
       {
-          ImGui::SliderFloat3("Translation", &translation.x, -1.017f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+          ImGui::SliderFloat3("TranslationA", &translationA.x, 0.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+          ImGui::SliderFloat3("TranslationB", &translationB.x, 0.0f, 2.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
           ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
       }
 
