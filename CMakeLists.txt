@@ -7,7 +7,10 @@ endif()
 
 # 收集资源文件
 file(GLOB SRC ${PROJECT_SOURCE_DIR}/src/*.cc
+              ${PROJECT_SOURCE_DIR}/src/vendor/*/*.cpp
               ${PROJECT_SOURCE_DIR}/src/vendor/*/*.cc)
+# 排除某些文件
+list(REMOVE_ITEM SRC "${PROJECT_SOURCE_DIR}/src/vendor/imgui/main.cpp")
 
 add_executable(opengl ${SRC})
 
